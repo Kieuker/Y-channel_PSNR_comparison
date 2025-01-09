@@ -19,13 +19,22 @@ SR 논문에서 자주 사용되는 PSNR 측정 방법인 ground-truth image와 
 ## 실험 결과
 ```
 Scale Factor: 3
+===== Resizing with PIL.Image.resize() =====
 RGB psnr:                    28.606664657592773
 PIL grayscale psnr:          29.061071395874023
 skimage ycbcr psnr:          30.37847328186035
 opencv YCrCb grayscale psnr: 29.0618953704834
 opencv YUV grayscale psnr:   29.0618953704834
-BT.601 grayscale psnr:       29.061473846435547
-BT.709 grayscale psnr:       29.071386337280273
+BT.601 grayscale psnr:       29.061508178710938
+BT.709 grayscale psnr:       29.07138442993164
+===== Resizing with MATLAB style imresize() =====
+RGB psnr:                    25.947063446044922
+PIL grayscale psnr:          27.098241806030273
+skimage ycbcr psnr:          28.418691635131836
+opencv YCrCb grayscale psnr: 27.098852157592773
+opencv YUV grayscale psnr:   27.098852157592773
+BT.601 grayscale psnr:       27.09897232055664
+BT.709 grayscale psnr:       26.946773529052734
 ```
 
 ## Run

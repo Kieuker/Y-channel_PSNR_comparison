@@ -1,10 +1,11 @@
-import torch
 import os
+import torch
 from PIL import Image
 from torchvision import transforms
 import skimage.color as sc
 import numpy as np
 import cv2
+from scripts.matlab_functions import imresize
 
 def psnr(gt_image, target_image):
     '''
@@ -13,7 +14,7 @@ def psnr(gt_image, target_image):
     '''
     return 10.0 * torch.log10(1.0 / torch.mean((gt_image - target_image) ** 2))
 
-def get_avg_psnr(images, rgb2gray_f=None, scale_factor=3):
+def get_avg_psnr(images, rgb2gray_f=None, scale_factor=3, matlab_resize=False):
     '''
     이미지 데이터와 grayscale 변환 함수를 넣으면 scale_factor에 따라 평균 psnr을 구하는 함수.
     rgb2gray_f는 RGB PIL Image를 입력으로 받고 Grayscale PIL Image를 리턴해야 한다.
@@ -22,10 +23,20 @@ def get_avg_psnr(images, rgb2gray_f=None, scale_factor=3):
     n = len(images)
     GTs = [image.copy() for image in images]
     LRs = []
-    for gt in GTs:
-        w, h = gt.size
-        lr = gt.resize((w//scale_factor, h//scale_factor)).resize((w,h), Image.BICUBIC)
-        LRs.append(lr)
+    if matlab_resize: # MATLAB style imresize로 LR 생성
+        for gt in GTs:
+            gt_tensor = transforms.ToTensor()(gt)
+            lr_tensor = imresize(gt_tensor, 1/scale_factor)
+            lr_tensor = imresize(lr_tensor, scale_factor)
+            lr_tensor = transforms.CenterCrop((gt_tensor.shape[1], gt_tensor.shape[2]))(lr_tensor)
+            lr = transforms.ToPILImage()(lr_tensor)
+            LRs.append(lr)
+    else: # PIL Image resize 함수로 LR 생성
+        for gt in GTs:
+            w, h = gt.size
+            lr = gt.resize((w//scale_factor, h//scale_factor)).resize((w,h), Image.BICUBIC)
+            LRs.append(lr)
+
 
     # 주어진 rgb2gray 함수로 각 이미지 변환
     if rgb2gray_f:
@@ -147,6 +158,7 @@ if __name__ == '__main__':
             images.append(img.convert('RGB'))
 
     print("Scale Factor: {}".format(sf))
+    print("===== Resizing with PIL.Image.resize() =====")
     print("RGB psnr:                    {}".format(get_avg_psnr(images, scale_factor=sf)))
     print("PIL grayscale psnr:          {}".format(get_avg_psnr(images, PIL_r2g, scale_factor=sf)))
     print("skimage ycbcr psnr:          {}".format(get_avg_psnr(images, skimage_r2g, scale_factor=sf)))
@@ -154,3 +166,11 @@ if __name__ == '__main__':
     print("opencv YUV grayscale psnr:   {}".format(get_avg_psnr(images, opencv_r2g_YUV, scale_factor=sf)))
     print("BT.601 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt601, scale_factor=sf)))
     print("BT.709 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt709, scale_factor=sf)))
+    print("===== Resizing with MATLAB style imresize() =====")
+    print("RGB psnr:                    {}".format(get_avg_psnr(images, scale_factor=sf, matlab_resize=True)))
+    print("PIL grayscale psnr:          {}".format(get_avg_psnr(images, PIL_r2g, scale_factor=sf, matlab_resize=True)))
+    print("skimage ycbcr psnr:          {}".format(get_avg_psnr(images, skimage_r2g, scale_factor=sf, matlab_resize=True)))
+    print("opencv YCrCb grayscale psnr: {}".format(get_avg_psnr(images, opencv_r2g_YCrCb, scale_factor=sf, matlab_resize=True)))
+    print("opencv YUV grayscale psnr:   {}".format(get_avg_psnr(images, opencv_r2g_YUV, scale_factor=sf, matlab_resize=True)))
+    print("BT.601 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt601, scale_factor=sf, matlab_resize=True)))
+    print("BT.709 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt709, scale_factor=sf, matlab_resize=True)))
