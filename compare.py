@@ -5,6 +5,7 @@ from torchvision import transforms
 import skimage.color as sc
 import numpy as np
 import cv2
+from colour.models import RGB_to_YCbCr
 from scripts.matlab_functions import imresize
 
 def psnr(gt_image, target_image):
@@ -145,6 +146,19 @@ def rgb_to_ycbcr_bt709(pil_img, return_y_channel=True):
 
     return ycbcr_pil_img
 
+def colour_science_r2g(image):
+    '''
+    colour-science 의 RGB_to_YCbCr 함수를 이용하여 변환
+    Args:
+        image (PIL.Image.Image): RGB PIL 이미지.
+    Returns:
+        PIL.Image.Image: YCbCr의 Y채널을 따온 grayscale 이미지.
+    '''
+    image_np = np.array(image, dtype=np.float32) / 255.0
+    ycbcr_np_img = RGB_to_YCbCr(image_np)
+    g_np_img = ycbcr_np_img[:, :, 0]
+    return Image.fromarray(g_np_img)
+
 if __name__ == '__main__':
     img_dir = 'validation-images/' # your path to validation datasets
     sf = 3 # scale-factor
@@ -160,17 +174,19 @@ if __name__ == '__main__':
     print("Scale Factor: {}".format(sf))
     print("===== Resizing with PIL.Image.resize() =====")
     print("RGB psnr:                    {}".format(get_avg_psnr(images, scale_factor=sf)))
-    print("PIL grayscale psnr:          {}".format(get_avg_psnr(images, PIL_r2g, scale_factor=sf)))
+    print("PIL YCbCr psnr:              {}".format(get_avg_psnr(images, PIL_r2g, scale_factor=sf)))
     print("skimage ycbcr psnr:          {}".format(get_avg_psnr(images, skimage_r2g, scale_factor=sf)))
     print("opencv YCrCb grayscale psnr: {}".format(get_avg_psnr(images, opencv_r2g_YCrCb, scale_factor=sf)))
     print("opencv YUV grayscale psnr:   {}".format(get_avg_psnr(images, opencv_r2g_YUV, scale_factor=sf)))
     print("BT.601 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt601, scale_factor=sf)))
     print("BT.709 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt709, scale_factor=sf)))
+    print("colour-science YCbCr psnr:   {}".format(get_avg_psnr(images, colour_science_r2g, scale_factor=sf)))
     print("===== Resizing with MATLAB style imresize() =====")
     print("RGB psnr:                    {}".format(get_avg_psnr(images, scale_factor=sf, matlab_resize=True)))
-    print("PIL grayscale psnr:          {}".format(get_avg_psnr(images, PIL_r2g, scale_factor=sf, matlab_resize=True)))
+    print("PIL YCbCr psnr:              {}".format(get_avg_psnr(images, PIL_r2g, scale_factor=sf, matlab_resize=True)))
     print("skimage ycbcr psnr:          {}".format(get_avg_psnr(images, skimage_r2g, scale_factor=sf, matlab_resize=True)))
     print("opencv YCrCb grayscale psnr: {}".format(get_avg_psnr(images, opencv_r2g_YCrCb, scale_factor=sf, matlab_resize=True)))
     print("opencv YUV grayscale psnr:   {}".format(get_avg_psnr(images, opencv_r2g_YUV, scale_factor=sf, matlab_resize=True)))
     print("BT.601 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt601, scale_factor=sf, matlab_resize=True)))
     print("BT.709 grayscale psnr:       {}".format(get_avg_psnr(images, rgb_to_ycbcr_bt709, scale_factor=sf, matlab_resize=True)))
+    print("colour-science YCbCr psnr:   {}".format(get_avg_psnr(images, colour_science_r2g, scale_factor=sf, matlab_resize=True)))

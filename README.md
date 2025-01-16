@@ -7,6 +7,7 @@ SR 논문에서 자주 사용되는 PSNR 측정 방법인 ground-truth image와 
 - Scikit Image - rgb2ycbcr()
 - OpenCV - cvtColor(..., cv2.COLOR_RGB2YCrCb)
 - OpenCV - cvtColor(..., cv2.COLOR_RGB2YUV)
+- Colour Science - RGB_to_YCbCr()
 - ITU-R 지정 BT.601 표준을 구현한 RGB to YUV 함수
 - ITU-R 지정 BT.709 표준을 구현한 RGB to YUV 함수
 
@@ -21,20 +22,22 @@ SR 논문에서 자주 사용되는 PSNR 측정 방법인 ground-truth image와 
 Scale Factor: 3
 ===== Resizing with PIL.Image.resize() =====
 RGB psnr:                    28.606664657592773
-PIL grayscale psnr:          29.061071395874023
+PIL YCbCr psnr:              29.061071395874023
 skimage ycbcr psnr:          30.37847328186035
 opencv YCrCb grayscale psnr: 29.0618953704834
 opencv YUV grayscale psnr:   29.0618953704834
 BT.601 grayscale psnr:       29.061508178710938
 BT.709 grayscale psnr:       29.07138442993164
+colour-science YCbCr psnr:   30.40645980834961
 ===== Resizing with MATLAB style imresize() =====
 RGB psnr:                    25.947063446044922
-PIL grayscale psnr:          27.098241806030273
+PIL YCbCr psnr:              27.098241806030273
 skimage ycbcr psnr:          28.418691635131836
 opencv YCrCb grayscale psnr: 27.098852157592773
 opencv YUV grayscale psnr:   27.098852157592773
 BT.601 grayscale psnr:       27.09897232055664
 BT.709 grayscale psnr:       26.946773529052734
+colour-science YCbCr psnr:   28.27627944946289
 ```
 
 ## Run
